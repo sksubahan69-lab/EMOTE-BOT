@@ -19,10 +19,10 @@ from xC4 import Emote_k
 # ==================== কনফিগারেশন ====================
 # আপনার অ্যাকাউন্টের তথ্য
 BOT_UID = os.environ.get("BOT_UID", "8418656473")
-BOT_PW  = os.environ.get("BOT_PW",  "29E1148FAA232BF1345320077DF231E8470D740C8E5B22EE31B812AB8B76AB2E"")
+# এখানে একটি বাড়তি ডাবল কোট (") ছিল, সেটি ঠিক করা হয়েছে
+BOT_PW  = os.environ.get("BOT_PW",  "29E1148FAA232BF1345320077DF231E8470D740C8E5B22EE31B812AB8B76AB2E")
 REGION  = os.environ.get("REGION",  "BD")
 
-# Pella/Vercel/Render অটোমেটিক পোর্ট দেবে, না দিলে 10000 ব্যবহার করবে
 PORT    = int(os.environ.get("PORT", 10000))
 
 app = Flask(__name__)
@@ -49,7 +49,6 @@ async def login_and_connect():
         print("[-] Login failed, retry in 10s...")
         return False
 
-    # ডাটা সেভ করা হচ্ছে
     bot_core.bot_uid = result["bot_uid"]
     bot_core.ToKen   = result["token"]
     bot_core.region  = result["region"]
@@ -111,7 +110,7 @@ async def do_emote_safe(teamcode, uids, emoteid):
         await bot_core.online_writer.drain()
         CURRENT_TEAM_CODE = str(teamcode)
         
-        # প্লেয়ার ঢোকার জন্য অপেক্ষা
+        # প্লেয়ার ঢোকার জন্য অপেক্ষা (ব্যান এড়াতে ৩ সেকেন্ড)
         await asyncio.sleep(3.0) 
 
     # ২. ইমোট পাঠানো
@@ -124,6 +123,7 @@ async def do_emote_safe(teamcode, uids, emoteid):
         await bot_core.online_writer.drain()
         sent += 1
         
+        # স্বাভাবিক গতিতে ইমোট পাঠানোর জন্য ০.৫ সেকেন্ড বিরতি
         await asyncio.sleep(0.5)
 
     return sent
@@ -161,13 +161,14 @@ def emote_api():
         return jsonify({"status": "error", "msg": f"Timeout: {e}"}), 500
 
 # ==================== চালু করা ====================
-# Pella/Vercel এর জন্য গ্লোবালি অ্যাপ রান করা
+# Vercel/Cloud প্ল্যাটফর্মের জন্য অ্যাপ ভেরিয়েবল নিশ্চিত করা হলো
+app = app 
+
 loop = asyncio.new_event_loop()
 MAIN_LOOP = loop
 threading.Thread(target=_run_loop, args=(loop,), daemon=True).start()
 asyncio.run_coroutine_threadsafe(main_loop(), loop)
 
 if __name__ == "__main__":
-    # host="0.0.0.0" দেওয়া হলো যাতে বাইরের নেটওয়ার্ক থেকে অ্যাক্সেস করা যায়
     print(f"[*] Public Web API starting on port {PORT}...")
     app.run(host="0.0.0.0", port=PORT, threaded=True)
